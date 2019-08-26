@@ -46,8 +46,8 @@ class test_line_methods(unittest.TestCase):
         testline = line(10)
         testline.index_list=[3]
         testlinecells_dict= {
-                '__________': {'xxxx': '__xxx.xxxx', '_.x': '___xxx._.x', 'xxxxxx': 'xxx.xxxxxx', 'xxxxxxxxx': '__________'},
-                '__.___._x_': {'xxxx': '__________', 'xxx': '__.xxx.xxx', 'xxx.xxx': '__________'},
+                '__________': {'xxxx': '..xxx.xxxx', '_.x': '...xxx._.x', 'xxxxxx': 'xxx.xxxxxx', 'xxxxxxxxx': '__________'},
+                '__.___._x_': {'xxxx': '__________', 'xxx': '...xxx.xxx', 'xxx.xxx': '__________'},
                 '_____xxx.x': {'xxxx': '__________', 'xxxx.x': 'xxx.xxxx.x'},
                 '___.x_x_.x': {'x_xx.x' : 'xxx.x_xx.x'}
                 }
