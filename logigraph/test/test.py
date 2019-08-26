@@ -59,3 +59,26 @@ class test_line_methods(unittest.TestCase):
                 endline.cells_list = list(endline_cells)
                 self.assertEqual(expected_dict[endline_cells], ''.join(testline.merge_lines(endline).cells_list))
                 
+    def test_get_common_line(self):
+        testline =line(10)
+        lines_to_compare = []
+        cells_to_compare = [
+                '__.x._xx..',
+                '__.x.xxx..',
+                '__.x.xxx..',
+                '__.x.xxx..',
+                '__.x.xxx..',
+                '__.x.xxx._',
+                '__.x.xx_..',
+                '__.x.xx_..',
+                '__.x.xxx..',
+                '__.x_xxx..'
+                ]
+
+        for cells_str in cells_to_compare:
+            line_to_add = line(10)
+            line_to_add.cells_list = list(cells_str)
+            lines_to_compare.append(line_to_add)
+
+        self.assertEqual('__.x__x_._', ''.join(testline.get_common_line(lines_to_compare).cells_list))
+       

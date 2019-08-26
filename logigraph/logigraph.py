@@ -1,3 +1,5 @@
+import pdb
+
 class line():
     def __init__(self, lenght):
         self.cells_list = lenght * ['_']
@@ -12,12 +14,19 @@ class line():
         cells_string = ''.join(self.cells_list)
         return index_string + '|' + cells_string     
 
+    def partial_solve(self):
+        partial_solution = self.get_common_line(self.get_possible_solve_list())
+        self.cells_list = partial_solution.cells_list[:]
+
     def get_possible_solve_list(self):
         possible_solve_list = []
         if self.index_list == []:
-            emptyline = line(self.size)
-            emptyline.cells_list = self.size * ['.']
-            return [emptyline] 
+            if 'x' in self.cells_list:
+                return []
+            else:
+                emptyline = line(self.size)
+                emptyline.cells_list = self.size * ['.']
+                return [emptyline] 
 
         for offset in range(self.size):
             if self.is_offset_ok(offset):
@@ -26,9 +35,27 @@ class line():
                 if len(remaining_line_possible_solve_list) > 0:
                     for remaining_line_possible_solve in remaining_line_possible_solve_list:
                         possible_solve_list.append(self.merge_lines(remaining_line_possible_solve))
+                        
         return possible_solve_list
 
-    def is_offset_ok(self, offset):
+    def get_common_line(self, lines_to_compare):
+        common_line = line(self.size)
+        common_line.index_list = self.index_list
+        for cell_nbr in range(self.size):
+            if self.check_equal([item.cells_list[cell_nbr] for item in lines_to_compare]):
+                common_line.cells_list[cell_nbr] = lines_to_compare[0].cells_list[cell_nbr]
+        return common_line
+
+    def check_equal(self, iterator):
+        iterator = iter(iterator)
+        try:
+            first = next(iterator)
+        except StopIteration:
+            return True
+        return all(first == rest for rest in iterator)
+
+
+    def is_offset_ok(self, offset):                             
         if offset > self.size:
             return False
         
@@ -84,6 +111,7 @@ class line():
             if original_cell == '_':
                 merged_line.cells_list[cell_number + self.size - endline.size] = endline_cell
             elif original_cell != endline_cell:
+                pdb.set_trace()
                 print('Error during merging, a conflict happened')
                 return line(self.size)
                 
