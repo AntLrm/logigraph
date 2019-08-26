@@ -1,5 +1,3 @@
-import pdb
-
 class line():
     def __init__(self, lenght):
         self.cells_list = lenght * ['_']
@@ -111,7 +109,6 @@ class line():
             if original_cell == '_':
                 merged_line.cells_list[cell_number + self.size - endline.size] = endline_cell
             elif original_cell != endline_cell:
-                pdb.set_trace()
                 print('Error during merging, a conflict happened')
                 return line(self.size)
                 
