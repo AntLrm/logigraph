@@ -1,116 +1,96 @@
-class line():
-    def __init__(self, lenght):
-        self.cells_list = lenght * ['_']
-        self.index_list = []
-        self.size = lenght
-        
+from numpy import transpose, array
+from logigraph.line import line
+
+class logigraph():
+    def __init__(self, line_index_list, col_index_list):
+        self.line_list = []
+        self.col_index_list = []
+        self.max_loop = 500
+        self.is_transposed = False
+        self.line_nbr = len(line_index_list)
+        self.col_nbr = len(col_index_list)
+
+        for col in range(self.col_nbr):
+            self.add_col_index(col_index_list[col], col)
+        for line in range(self.line_nbr):
+            self.add_empty_line(line_index_list[line], len(col_index_list))
+
+    #TODO: clean names and overall in __repr__
     def __repr__(self):
-        index_str_list = []
-        for index in self.index_list:
-            index_str_list.append(str(index))
-        index_string = ''.join(index_str_list)
-        cells_string = ''.join(self.cells_list)
-        return index_string + '|' + cells_string     
+        offset_line = max([len(line.index_list) for line in self.line_list])
+        offset_col = max([len(index) for index in self.col_index_list])
+        col_string = self.col_index_string(1 + offset_line, offset_col)
+        col_line =''
+        for line in self.line_list:
+            col_line = col_line + '\n' + line.__repr__(offset_line)
+        return col_string + col_line
 
-    def partial_solve(self):
-        partial_solution = self.get_common_line(self.get_possible_solve_list())
-        self.cells_list = partial_solution.cells_list[:]
+    def col_index_string(self, offset_line, offset_col):
+        col_index_string_list = []
+        for i in range(offset_line):
+            col_index_string_list.append(offset_col * [' '])
+        for col_index in self.col_index_list: 
+            col_string = (offset_col - len(col_index))*[' ']
+            col_string.extend([str(index) for index in col_index])
+            col_index_string_list.append(col_string)
+        col_array = array(col_index_string_list).transpose()
+        string_repr = ''
+        for string_line in col_array:
+            string_repr = string_repr + '\n' + ''.join(string_line)
+        return string_repr
 
-    def get_possible_solve_list(self):
-        possible_solve_list = []
-        if self.index_list == []:
-            if 'x' in self.cells_list:
-                return []
-            else:
-                emptyline = line(self.size)
-                emptyline.cells_list = self.size * ['.']
-                return [emptyline] 
-
-        for offset in range(self.size):
-            if self.is_offset_ok(offset):
-                remaining_line = self.get_remaining_line(offset)
-                remaining_line_possible_solve_list = remaining_line.get_possible_solve_list()
-                if len(remaining_line_possible_solve_list) > 0:
-                    for remaining_line_possible_solve in remaining_line_possible_solve_list:
-                        possible_solve_list.append(self.merge_lines(remaining_line_possible_solve))
-                        
-        return possible_solve_list
-
-    def get_common_line(self, lines_to_compare):
-        common_line = line(self.size)
-        common_line.index_list = self.index_list
-        for cell_nbr in range(self.size):
-            if self.check_equal([item.cells_list[cell_nbr] for item in lines_to_compare]):
-                common_line.cells_list[cell_nbr] = lines_to_compare[0].cells_list[cell_nbr]
-        return common_line
-
-    def check_equal(self, iterator):
-        iterator = iter(iterator)
-        try:
-            first = next(iterator)
-        except StopIteration:
-            return True
-        return all(first == rest for rest in iterator)
-
-
-    def is_offset_ok(self, offset):                             
-        if offset > self.size:
-            return False
         
-        first_index = self.index_list[0]
-        for block_cell in range(first_index):
-            if offset + block_cell >= self.size:
-                return False
-            if self.cells_list[offset + block_cell] == '.':
-                return False
+    def add_empty_line(self, index_list, size):
+        line_to_add = line(size)
+        line_to_add.index_list = index_list
+        self.line_list.append(line_to_add)
 
-        if offset + first_index < self.size:
-            if self.cells_list[offset + first_index] == 'x':
-                return False
-        if offset != 0:
-            if self.cells_list[offset - 1] == 'x':
-                return False
-        return True
+    def add_col_index(self, col_index_list, col_nbr):
+        self.col_index_list.append(col_index_list)
 
-
-    def get_remaining_line(self, offset):
-        first_index = self.index_list[0]
-        starting_cell = offset + first_index + 1
-        remaining_line = line(self.size - starting_cell)
-        remaining_line.index_list = self.index_list[1:]
-        remaining_line.cells_list = self.cells_list[starting_cell:]
-        return remaining_line
-
-
-    def merge_lines(self, endline):
-        merged_line = line(self.size)
-        merged_line.cells_list = self.cells_list[:]
-        merged_line.index_list = self.index_list
-        offset = self.size - endline.size - self.index_list[0] - 1
+    def solve(self):
+        print('Running...')
+        loop = 0
+        while self.is_not_solved() and loop < self.max_loop:
+            loop += 1
+            for line in self.line_list:
+                line = line.partial_solve()
+                line
+            self.transpose()
         
-        if offset < 0:
-            print('Error during merging, out of range')
-            return line(self.size)
+        if loop == self.max_loop:
+            print('Max number of iteration reached')
+        else: 
+            print('Done')
 
-        'writing first block'
-        if offset != 0 :
-            for cell_number in range(offset):
-                merged_line.cells_list[cell_number] = '.'
-        for cell_number in range(offset, offset + self.index_list[0]):
-            merged_line.cells_list[cell_number] = 'x'
-        if offset + self.index_list[0] < merged_line.size:
-            merged_line.cells_list[offset+self.index_list[0]] = '.'
+        if self.is_transposed:
+            self.transpose
+
+    def is_not_solved(self):
+        return any('_' in line.cells_list for line in self.line_list)
+
+    def transpose(self):
+        is_transposed = not self.is_transposed
+        canvas_array = self.get_canvas_array() 
+        transposed_canvas_array = canvas_array.transpose()
+        self.__init__(self.col_index_list, [item.index_list for item in self.line_list])
+        self.set_canvas(transposed_canvas_array)
+        self.is_transposed = is_transposed
+
+    def get_canvas_array(self):
+        return array([line.cells_list for line in self.line_list])
+
+    def set_canvas(self, canvas):
+        line_index = 0
+        for line in self.line_list:
+            line.cells_list = canvas[line_index]
+            line_index +=1 
         
-        'writing remaining block with position'
-        for cell_number in range(endline.size): 
-            original_cell = self.cells_list[cell_number + self.size - endline.size]
-            endline_cell = endline.cells_list[cell_number]
 
-            if original_cell == '_':
-                merged_line.cells_list[cell_number + self.size - endline.size] = endline_cell
-            elif original_cell != endline_cell:
-                print('Error during merging, a conflict happened')
-                return line(self.size)
-                
-        return merged_line
+
+        
+
+
+        
+
 

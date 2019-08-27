@@ -1,4 +1,4 @@
-from logigraph.logigraph import line
+from logigraph.logigraph import logigraph
 
 if __name__ == '__main__':
     a = line(10)
