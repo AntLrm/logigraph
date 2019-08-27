@@ -55,7 +55,6 @@ class logigraph():
             loop += 1
             for line in self.line_list:
                 line = line.partial_solve()
-                line
             self.transpose()
 
         if self.is_transposed:
