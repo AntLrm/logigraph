@@ -57,14 +57,15 @@ class logigraph():
                 line = line.partial_solve()
                 line
             self.transpose()
+
+        if self.is_transposed:
+            self.transpose()
         
         if loop == self.max_loop:
             print('Max number of iteration reached')
         else: 
             print('Done')
 
-        if self.is_transposed:
-            self.transpose
 
     def is_not_solved(self):
         return any('_' in line.cells_list for line in self.line_list)
