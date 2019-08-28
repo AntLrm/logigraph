@@ -6,7 +6,6 @@ class logigraph():
     def __init__(self, line_index_list, col_index_list):
         self.line_list = []
         self.col_index_list = []
-        self.max_loop = 500
         self.is_transposed = False
         self.line_nbr = len(line_index_list)
         self.col_nbr = len(col_index_list)
@@ -77,24 +76,6 @@ class logigraph():
 
     def add_col_index(self, col_index_list, col_nbr):
         self.col_index_list.append(col_index_list)
-
-    def solve(self):
-        print('running...')
-        loop = 0
-        while self.is_not_solved() and loop < self.max_loop:
-            loop += 1
-            for line in self.line_list:
-                line = line.partial_solve()
-            self.transpose()
-
-        if self.is_transposed:
-            self.transpose()
-        
-        if loop == self.max_loop:
-            print('max number of iteration reached')
-        else: 
-            print('done')
-
 
     def is_not_solved(self):
         return any('_' in line.cells_list for line in self.line_list)
