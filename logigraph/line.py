@@ -7,17 +7,18 @@ class line():
         self.size = lenght
         self.has_been_updated = True
         
-    def __repr__(self, offset = 0):
-        index_str_list = []
-        for index in self.index_list:
-            index_str_list.append(str(index))
+    def __repr__(self):
+        index_string = self.repr_index()
+        cells_string = ''.join(self.cells_list)
+        return index_string + cells_string     
+
+    def repr_index(self, offset = 0):
         if offset != 0:
-            prefix_space = ''.join((offset - len(self.index_list))*[' '])
+            prefix_space = ''.join((offset - len(self.repr_index()))*[' '])
         else:
             prefix_space = ''
-        index_string = ''.join(index_str_list)
-        cells_string = ''.join(self.cells_list)
-        return prefix_space + index_string + '|' + cells_string     
+
+        return prefix_space + ','.join([str(index) for index in self.index_list]) + '|'
 
     def partial_solve(self):
         if self.has_been_updated:

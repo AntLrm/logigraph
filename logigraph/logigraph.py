@@ -1,3 +1,4 @@
+import pdb
 from numpy import transpose, array
 from logigraph.line import line
 
@@ -15,30 +16,59 @@ class logigraph():
         for line in range(self.line_nbr):
             self.add_empty_line(line_index_list[line], len(col_index_list))
 
-    #TODO: clean names and overall in __repr__
+    #TODO: clean names and overall in __repr__ and col_index_string
     def __repr__(self):
-        offset_line = max([len(line.index_list) for line in self.line_list])
+        offset_line = 1 + max(len(line.repr_index()) for line in self.line_list) 
         offset_col = max([len(index) for index in self.col_index_list])
-        col_string = self.col_index_string(1 + offset_line, offset_col)
-        col_line =''
-        for line in self.line_list:
-            col_line = col_line + '\n' + line.__repr__(offset_line)
-        return col_string + col_line
+        col_index_string_list = self.get_col_index_string_list(offset_col)
+        col_string = self.col_index_string(col_index_string_list, offset_line, offset_col)
+        line_string = ''
 
-    def col_index_string(self, offset_line, offset_col):
+
+        for line in self.line_list:
+            line_string = line_string + '\n' + line.repr_index(offset_line) + self.repr_canvas_line(line, col_index_string_list)
+        return col_string + line_string
+
+    def get_col_index_string_list(self, offset_col):
         col_index_string_list = []
-        for i in range(offset_line):
-            col_index_string_list.append(offset_col * [' '])
+
         for col_index in self.col_index_list: 
             col_string = (offset_col - len(col_index))*[' ']
             col_string.extend([str(index) for index in col_index])
             col_index_string_list.append(col_string)
-        col_array = array(col_index_string_list).transpose()
+            col_index_string_list.append(offset_col * [','])
+
+        for col_index_string in col_index_string_list:
+           col_size = max([len(str(index)) for index in col_index_string]) 
+           if col_size > 1:
+               for i in range(len(col_index_string)):
+                   col_index_string[i] = ' ' * (col_size - len(col_index_string[i])) + col_index_string[i]
+        
+        return col_index_string_list
+
+    def col_index_string(self, col_index_string_list, offset_line, offset_col):
+        
+        offseted_col_index_string_list = [] 
+        for i in range(offset_line):
+            offseted_col_index_string_list.append(offset_col * [' '])
+        offseted_col_index_string_list.extend(col_index_string_list)
+        col_array = array(offseted_col_index_string_list).transpose()
+
         string_repr = ''
         for string_line in col_array:
             string_repr = string_repr + '\n' + ''.join(string_line)
         return string_repr
 
+    def repr_canvas_line(self, line, col_index_string_list):
+        canvas_line_string = ''
+        col = 0
+        for col_index_string in col_index_string_list:
+            if col_index_string[0] == ',':
+                col += 1
+            else:
+                col_size = max([len(str(index)) for index in col_index_string]) 
+                canvas_line_string = canvas_line_string + (col_size - 1) * ' ' + line.cells_list[col] + '|'
+        return canvas_line_string
         
     def add_empty_line(self, index_list, size):
         line_to_add = line(size)
@@ -49,7 +79,7 @@ class logigraph():
         self.col_index_list.append(col_index_list)
 
     def solve(self):
-        print('Running...')
+        print('running...')
         loop = 0
         while self.is_not_solved() and loop < self.max_loop:
             loop += 1
@@ -61,9 +91,9 @@ class logigraph():
             self.transpose()
         
         if loop == self.max_loop:
-            print('Max number of iteration reached')
+            print('max number of iteration reached')
         else: 
-            print('Done')
+            print('done')
 
 
     def is_not_solved(self):
