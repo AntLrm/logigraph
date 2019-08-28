@@ -126,3 +126,36 @@ class linear_solver():
                 return line(mline.size)
                 
         return merged_line
+
+class edge_logic_solver():
+    def __init__(self):
+        self.cases_list = ['first line', 'last line', 'first column', 'last column']
+        
+    def solve(self, logigraph):
+        l_solver = linear_solver()
+        for case in self.cases_list:
+            self.set_lines_and_index(logigraph, case)
+            edge_linear_solve_list = l_solver.get_possible_solve_list(self.edge_line)
+            for possible_solution in edge_linear_solve_list:
+                pattern_on_adjacent_line = self.get_pattern_on_adjacent_line(possible_solution)
+                if self.is_pattern_ok(pattern_on_adjacent_line):
+                    edge_solve_list.append(get_line_from_pattern(pattern_on_adjacent_line))
+            partial_solve = l_solver.get_common_line(edge_solve_list)
+            self.set_logigraph_line(logigraph, partial_solve, case)
+
+    def set_lines_and_index(self, logigraph, case):
+        pass
+
+    def get_pattern_on_adjacent_line(self, possible_solution):
+        pass
+
+    def is_pattern_ok(self, pattern):
+        pass
+
+    def get_line_from_pattern(pattern):
+        pass
+
+    def set_logigraph_line(logigraph, line, case):
+        pass       
+                
+                                                                     
