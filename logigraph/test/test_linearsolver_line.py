@@ -105,6 +105,5 @@ class test_line_solver_methods(unittest.TestCase):
             testline = line(len(solve_dict[solution][1]))
             testline.cells_list = list(solve_dict[solution][1])
             testline.index_list = solve_dict[solution][0]
-            testsolver.line_partial_solve(testline)
-            self.assertEqual(solution, ''.join(testline.cells_list))
+            self.assertEqual(solution, ''.join(testsolver.line_partial_solve(testline).cells_list))
 

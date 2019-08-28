@@ -3,12 +3,13 @@ from numpy import transpose, array
 from logigraph.line import line
 
 class logigraph():
-    def __init__(self, line_index_list, col_index_list):
+    def __init__(self, line_index_list = [[]] , col_index_list= [[]]):
         self.line_list = []
         self.col_index_list = []
         self.is_transposed = False
         self.line_nbr = len(line_index_list)
         self.col_nbr = len(col_index_list)
+        self.col_state_list = [True] * len(col_index_list)
 
         for col in range(self.col_nbr):
             self.add_col_index(col_index_list[col], col)
@@ -17,12 +18,14 @@ class logigraph():
 
     #TODO: clean names and overall in __repr__ and col_index_string
     def __repr__(self):
+        if self.line_nbr == 0 or self.col_nbr == 0 :
+            return "Empty logigraph"
+
         offset_line = 1 + max(len(line.repr_index()) for line in self.line_list) 
         offset_col = max([len(index) for index in self.col_index_list])
         col_index_string_list = self.get_col_index_string_list(offset_col)
         col_string = self.col_index_string(col_index_string_list, offset_line, offset_col)
         line_string = ''
-
 
         for line in self.line_list:
             line_string = line_string + '\n' + line.repr_index(offset_line) + self.repr_canvas_line(line, col_index_string_list)
@@ -69,7 +72,8 @@ class logigraph():
                 canvas_line_string = canvas_line_string + (col_size - 1) * ' ' + line.cells_list[col] + '|'
         return canvas_line_string
         
-    def set_logigraph_from_file(self, filepath):
+    #TODO clean this monstruosity of a method + add try catch on int() cast
+    def set_from_file(self, filepath):
         try:
             file_reader = open(filepath, 'r')
         except:
@@ -101,7 +105,6 @@ class logigraph():
                         col +=1
             else:
                 line_index_list.append([])
-            
                 for car in line:
                     if car == '|':
                         if index_string != '':
@@ -118,12 +121,7 @@ class logigraph():
                             index_string = ''
                 canvas_line += 1        
             line_read += 1
-
         self.__init__(line_index_list, col_index_list)
-                        
-
-
-
 
     def add_empty_line(self, index_list, size):
         line_to_add = line(size)
@@ -140,9 +138,12 @@ class logigraph():
         is_transposed = not self.is_transposed
         canvas_array = self.get_canvas_array() 
         transposed_canvas_array = canvas_array.transpose()
+        col_state_list = self.col_state_list
         self.__init__(self.col_index_list, [item.index_list for item in self.line_list])
         self.set_canvas(transposed_canvas_array)
         self.is_transposed = is_transposed
+        for line_nbr, line in enumerate(self.line_list):
+            line.has_been_updated = col_state_list[line_nbr]
 
     def get_canvas_array(self):
         return array([line.cells_list for line in self.line_list])

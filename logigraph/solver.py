@@ -5,13 +5,20 @@ class linear_solver():
     def __init__(self):
         self.max_loop = 500
 
-    def linear_solve(self, logigraph):
+    #TODO instead of checking for max loop, check if no lines nor column have been updated during 1 cycles.
+    def solve(self, logigraph):
         print('running...')
         loop = 0
         while logigraph.is_not_solved() and loop < self.max_loop:
             loop += 1
+            logigraph.col_state_list = [False]* len(logigraph.col_state_list)
             for line in logigraph.line_list:
-                line = self.line_partial_solve(line)
+                if line.has_been_updated:
+                    partial_solve = self.line_partial_solve(line)
+                    for cell_nbr, cell in enumerate(partial_solve.cells_list):
+                        if cell != line.cells_list[cell_nbr]:
+                            logigraph.col_state_list[cell_nbr] = True
+                    line.cells_list = deepcopy(partial_solve.cells_list)
             logigraph.transpose()
 
         if logigraph.is_transposed:
@@ -23,12 +30,7 @@ class linear_solver():
             print('done')
 
     def line_partial_solve(self, mline):
-        if mline.has_been_updated:
-            partial_solution = self.get_common_line(self.get_possible_solve_list(mline))
-            if partial_solution == mline:
-                mline.has_been_updated = False
-            else:
-                mline.cells_list = partial_solution.cells_list[:]
+        return self.get_common_line(self.get_possible_solve_list(mline))
 
     def get_possible_solve_list(self, mline):
         possible_solve_list = []
