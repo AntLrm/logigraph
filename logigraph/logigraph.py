@@ -69,6 +69,62 @@ class logigraph():
                 canvas_line_string = canvas_line_string + (col_size - 1) * ' ' + line.cells_list[col] + '|'
         return canvas_line_string
         
+    def set_logigraph_from_file(self, filepath):
+        try:
+            file_reader = open(filepath, 'r')
+        except:
+            print('error while opening input file, check existence')
+
+        col_index_list = []
+        line_index_list = []
+        canvas_line = 0
+        index_string = ''
+        line_read = 0
+        for line in file_reader:
+            if '|' not in line:
+                col = 0
+                for car in line:
+                    if car != ',':
+                        if car in '0123456789' :
+                            index_string = index_string + car
+
+                    elif index_string == '':
+                        if line_read == 0:
+                            col_index_list.append([])
+                        col +=1
+
+                    else:
+                        if line_read == 0: 
+                            col_index_list.append([])
+                        col_index_list[col].append(int(index_string))
+                        index_string = ''
+                        col +=1
+            else:
+                line_index_list.append([])
+            
+                for car in line:
+                    if car == '|':
+                        if index_string != '':
+                            line_index_list[canvas_line].append(int(index_string))
+                            index_string = ''
+                        else:
+                            break
+                    else:
+                        if car != ',':
+                            if car in '0123456789':
+                                index_string = index_string + car    
+                        else:
+                            line_index_list[canvas_line].append(int(index_string))
+                            index_string = ''
+                canvas_line += 1        
+            line_read += 1
+
+        self.__init__(line_index_list, col_index_list)
+                        
+
+
+
+
     def add_empty_line(self, index_list, size):
         line_to_add = line(size)
         line_to_add.index_list = index_list
