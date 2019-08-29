@@ -76,7 +76,7 @@ class logigraph():
     def set_from_file(self, filepath):
         try:
             file_reader = open(filepath, 'r')
-        except:
+        except IOError :
             print('error while opening input file, check existence')
 
         col_index_list = []
@@ -153,12 +153,3 @@ class logigraph():
         for line in self.line_list:
             line.cells_list = canvas[line_index]
             line_index +=1 
-        
-
-
-        
-
-
-        
-
-

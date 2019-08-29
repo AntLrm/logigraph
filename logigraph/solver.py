@@ -129,33 +129,57 @@ class linear_solver():
 
 class edge_logic_solver():
     def __init__(self):
-        self.cases_list = ['first line', 'last line', 'first column', 'last column']
+        self.cases_dict = {
+                'top' : [0,1],
+                'bottom' : [-1,-2],
+                'left' : [0,1],
+                'right' : [-1,-2]
+                }                
         
     def solve(self, logigraph):
         l_solver = linear_solver()
-        for case in self.cases_list:
+        for case in self.cases_dict:
             self.set_lines_and_index(logigraph, case)
             edge_linear_solve_list = l_solver.get_possible_solve_list(self.edge_line)
+            edge_solve_list = []
             for possible_solution in edge_linear_solve_list:
                 pattern_on_adjacent_line = self.get_pattern_on_adjacent_line(possible_solution)
                 if self.is_pattern_ok(pattern_on_adjacent_line):
-                    edge_solve_list.append(get_line_from_pattern(pattern_on_adjacent_line))
+                    edge_solve_list.append(possible_solution)
             partial_solve = l_solver.get_common_line(edge_solve_list)
             self.set_logigraph_line(logigraph, partial_solve, case)
 
     def set_lines_and_index(self, logigraph, case):
-        pass
+        if case in ['left', 'right']:
+            logigraph.transpose()
+
+        self.edge_line = logigraph.line_list[self.cases_dict[case][0]]
+        self.adjacent_line = logigraph.line_list[self.cases_dict[case][1]]
+        self.trans_index_list = [logigraph.col_index_list[col][self.cases_dict[case][0]] for col in range(logigraph.col_nbr)]
+
+        if logigraph.is_transposed:
+            logigraph.transpose()
 
     def get_pattern_on_adjacent_line(self, possible_solution):
-        pass
-
+        pattern_on_adjacent_line = deepcopy(self.adjacent_line)
+        for cell_nbr, cell in enumerate(possible_solution.cells_list):
+            if cell == 'x':
+                if self.trans_index_list[cell_nbr] > 1 :
+                    pattern_on_adjacent_line.cells_list[cell_nbr] = 'x'
+        return pattern_on_adjacent_line
+                    
     def is_pattern_ok(self, pattern):
-        pass
+        l_solver = linear_solver()
+        if len(l_solver.get_possible_solve_list(pattern)) > 0:
+            return True
+        else :
+            return False
 
-    def get_line_from_pattern(pattern):
-        pass
+    def set_logigraph_line(self, logigraph, line, case):
+        if case in ['left', 'right']:
+            logigraph.transpose()
 
-    def set_logigraph_line(logigraph, line, case):
-        pass       
-                
-                                                                     
+        logigraph.line_list[self.cases_dict[case][0]] = line
+        
+        if logigraph.is_transposed:
+            logigraph.transpose()
