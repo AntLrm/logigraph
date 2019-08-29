@@ -7,9 +7,22 @@ class logigraph():
         self.line_list = []
         self.col_index_list = []
         self.is_transposed = False
+        self.is_lineary_solvable = True
+        self.is_possible = True
         self.line_nbr = len(line_index_list)
         self.col_nbr = len(col_index_list)
         self.col_state_list = [True] * len(col_index_list)
+
+        for col in range(self.col_nbr):
+            self.add_col_index(col_index_list[col], col)
+        for line in range(self.line_nbr):
+            self.add_empty_line(line_index_list[line], len(col_index_list))
+
+    def update_line_col(self, line_index_list = [[]] , col_index_list= [[]]):
+        self.line_list = []
+        self.col_index_list = []
+        self.line_nbr = len(line_index_list)
+        self.col_nbr = len(col_index_list)
 
         for col in range(self.col_nbr):
             self.add_col_index(col_index_list[col], col)
@@ -139,9 +152,11 @@ class logigraph():
         canvas_array = self.get_canvas_array() 
         transposed_canvas_array = canvas_array.transpose()
         col_state_list = self.col_state_list
-        self.__init__(self.col_index_list, [item.index_list for item in self.line_list])
+        lin_state_list = [line.has_been_updated for line in self.line_list]
+        self.update_line_col(self.col_index_list, [item.index_list for item in self.line_list])
         self.set_canvas(transposed_canvas_array)
         self.is_transposed = is_transposed
+        self.col_state_list = lin_state_list
         for line_nbr, line in enumerate(self.line_list):
             line.has_been_updated = col_state_list[line_nbr]
 

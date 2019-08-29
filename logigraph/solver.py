@@ -3,34 +3,50 @@ from logigraph.line import line
 
 class linear_solver():
     def __init__(self):
-        self.max_loop = 500
+        self.max_loop = 1000
 
-    #TODO instead of checking for max loop, check if no lines nor column have been updated during 1 cycles.
     def solve(self, logigraph):
         print('running...')
         loop = 0
-        while logigraph.is_not_solved() and loop < self.max_loop:
+        while logigraph.is_not_solved() and loop < self.max_loop and logigraph.is_lineary_solvable and logigraph.is_possible :
             loop += 1
             logigraph.col_state_list = [False]* len(logigraph.col_state_list)
+
             for line in logigraph.line_list:
-                if line.has_been_updated:
+                # try at least 2 loops (one for lines and one for col), but after rely on update state of lines.
+                if line.has_been_updated or loop <= 2 :
                     partial_solve = self.line_partial_solve(line)
-                    for cell_nbr, cell in enumerate(partial_solve.cells_list):
-                        if cell != line.cells_list[cell_nbr]:
-                            logigraph.col_state_list[cell_nbr] = True
-                    line.cells_list = deepcopy(partial_solve.cells_list)
+                    if partial_solve.cells_list == []:
+                        logigraph.is_possible = False
+                        break
+                    else:
+                        for cell_nbr, cell in enumerate(partial_solve.cells_list):
+                            if cell != line.cells_list[cell_nbr]:
+                                logigraph.col_state_list[cell_nbr] = True
+                        line.cells_list = deepcopy(partial_solve.cells_list)
+            
             logigraph.transpose()
+            
+            if not any([line.has_been_updated for line in logigraph.line_list]) and not any(logigraph.col_state_list):
+                logigraph.is_lineary_solvable = False
 
         if logigraph.is_transposed:
             logigraph.transpose()
         
         if loop == self.max_loop:
-            print('max number of iteration reached')
+            print('Max number of iteration reached')
+        elif not logigraph.is_lineary_solvable :
+            print('Logigraph is not lineary solvable')
+        elif not logigraph.is_possible :
+            print('Logigraph is impossible')
         else: 
             print('done')
 
     def line_partial_solve(self, mline):
-        return self.get_common_line(self.get_possible_solve_list(mline))
+        possible_solve_list = self.get_possible_solve_list(mline)
+        if possible_solve_list == []:
+            print('Line is impossible to solve')
+        return self.get_common_line(possible_solve_list)
 
     def get_possible_solve_list(self, mline):
         possible_solve_list = []
@@ -54,6 +70,9 @@ class linear_solver():
         return possible_solve_list
 
     def get_common_line(self, lines_to_compare):
+        if lines_to_compare == []:
+            return line(0)
+
         common_line = line(lines_to_compare[0].size)
         common_line.index_list = lines_to_compare[0].index_list
         for cell_nbr in range(lines_to_compare[0].size):
@@ -183,3 +202,14 @@ class edge_logic_solver():
         
         if logigraph.is_transposed:
             logigraph.transpose()
+            
+class absurd_solver():
+    def solve(self, logigraph):
+        pass
+
+    def absurd_solve_try(self, logigraph, cell):
+        test_logigraph = deepcopy(logigraph)
+        test_logigraph.line_list[cell[0]].cells_list[cell[1]] = 'x'
+        l_solver = linear_solver()
+        l_solver.solve(test_logigraph)
+        
