@@ -6,7 +6,6 @@ class linear_solver():
         self.max_loop = 1000
 
     def solve(self, logigraph):
-        print('running...')
         loop = 0
         while logigraph.is_not_solved() and loop < self.max_loop and logigraph.is_lineary_solvable and logigraph.is_possible :
             loop += 1
@@ -33,19 +32,10 @@ class linear_solver():
         if logigraph.is_transposed:
             logigraph.transpose()
         
-        if loop == self.max_loop:
-            print('Max number of iteration reached')
-        elif not logigraph.is_lineary_solvable :
-            print('Logigraph is not lineary solvable')
-        elif not logigraph.is_possible :
-            print('Logigraph is impossible')
-        else: 
-            print('done')
-
     def line_partial_solve(self, mline):
         possible_solve_list = self.get_possible_solve_list(mline)
         if possible_solve_list == []:
-            print('Line is impossible to solve')
+            print('Line ' + repr(mline) + ' is impossible to solve')
         return self.get_common_line(possible_solve_list)
 
     def get_possible_solve_list(self, mline):
@@ -199,17 +189,34 @@ class edge_logic_solver():
             logigraph.transpose()
 
         logigraph.line_list[self.cases_dict[case][0]] = line
+        logigraph.update()
         
         if logigraph.is_transposed:
             logigraph.transpose()
             
+#TODO set traces on absurd solver and check behavior. It looks fine on the outside but I suspect some weird behavior if i try to solve absurd.txt (after a edge + linear solve)
 class absurd_solver():
     def solve(self, logigraph):
-        pass
-
+        l_solver = linear_solver()
+        for cell in [[line, col] for line in range(logigraph.line_nbr) for col in range(logigraph.col_nbr)]:
+            self.absurd_solve_try(logigraph, cell)
+            if not logigraph.is_not_solved():
+                break
+            l_solver.solve(logigraph)
+            if not logigraph.is_not_solved():
+                break
+        if logigraph.is_not_solved():
+            logigraph.is_possible = False
+            
     def absurd_solve_try(self, logigraph, cell):
         test_logigraph = deepcopy(logigraph)
         test_logigraph.line_list[cell[0]].cells_list[cell[1]] = 'x'
+        test_logigraph.update()
         l_solver = linear_solver()
         l_solver.solve(test_logigraph)
+        if not test_logigraph.is_possible :
+            logigraph.line_list[cell[0]].cells_list[cell[1]] = '.'
+        else :
+            logigraph = test_logigraph
+        logigraph.update()
         

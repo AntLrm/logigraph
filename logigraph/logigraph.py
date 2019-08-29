@@ -168,3 +168,7 @@ class logigraph():
         for line in self.line_list:
             line.cells_list = canvas[line_index]
             line_index +=1 
+
+    def update(self):
+        self.is_possible = True
+        self.is_lineary_solvable = True
