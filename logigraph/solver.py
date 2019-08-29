@@ -2,15 +2,12 @@ from copy import deepcopy
 from logigraph.line import line
 
 class linear_solver():
-    def __init__(self):
-        self.max_loop = 1000
 
     def solve(self, logigraph):
         loop = 0
-        while logigraph.is_not_solved() and loop < self.max_loop and logigraph.is_lineary_solvable and logigraph.is_possible :
+        while not logigraph.is_full() and logigraph.is_lineary_solvable and logigraph.is_possible :
             loop += 1
-            logigraph.col_state_list = [False]* len(logigraph.col_state_list)
-
+            logigraph.col_state_list = logigraph.col_nbr * [False]
             for line in logigraph.line_list:
                 # try at least 2 loops (one for lines and one for col), but after rely on update state of lines.
                 if line.has_been_updated or loop <= 2 :
@@ -22,15 +19,18 @@ class linear_solver():
                         for cell_nbr, cell in enumerate(partial_solve.cells_list):
                             if cell != line.cells_list[cell_nbr]:
                                 logigraph.col_state_list[cell_nbr] = True
+
                         line.cells_list = deepcopy(partial_solve.cells_list)
             
             logigraph.transpose()
-            
             if not any([line.has_been_updated for line in logigraph.line_list]) and not any(logigraph.col_state_list):
                 logigraph.is_lineary_solvable = False
 
         if logigraph.is_transposed:
             logigraph.transpose()
+
+        if not logigraph.is_solved() and logigraph.is_full():
+            logigraph.is_possible = False
         
     def line_partial_solve(self, mline):
         possible_solve_list = self.get_possible_solve_list(mline)
@@ -194,18 +194,17 @@ class edge_logic_solver():
         if logigraph.is_transposed:
             logigraph.transpose()
             
-#TODO set traces on absurd solver and check behavior. It looks fine on the outside but I suspect some weird behavior if i try to solve absurd.txt (after a edge + linear solve)
 class absurd_solver():
     def solve(self, logigraph):
         l_solver = linear_solver()
         for cell in [[line, col] for line in range(logigraph.line_nbr) for col in range(logigraph.col_nbr)]:
             self.absurd_solve_try(logigraph, cell)
-            if not logigraph.is_not_solved():
+            if logigraph.is_solved():
                 break
             l_solver.solve(logigraph)
-            if not logigraph.is_not_solved():
+            if logigraph.is_solved():
                 break
-        if logigraph.is_not_solved():
+        if not logigraph.is_solved():
             logigraph.is_possible = False
             
     def absurd_solve_try(self, logigraph, cell):
@@ -217,6 +216,5 @@ class absurd_solver():
         if not test_logigraph.is_possible :
             logigraph.line_list[cell[0]].cells_list[cell[1]] = '.'
         else :
-            logigraph = test_logigraph
+            logigraph = deepcopy(test_logigraph)
         logigraph.update()
-        

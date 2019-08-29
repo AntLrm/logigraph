@@ -144,8 +144,31 @@ class logigraph():
     def add_col_index(self, col_index_list, col_nbr):
         self.col_index_list.append(col_index_list)
 
-    def is_not_solved(self):
-        return any('_' in line.cells_list for line in self.line_list)
+    #TODO find some way to avoid repetition here. maybe with transpose returning a value instead of working on self.
+    def is_solved(self):
+        if not self.is_full() :
+            return False
+        else :
+            for line in self.line_list :
+                if not line.is_solved():
+                    return False
+            self.transpose()
+            for line in self.line_list :
+                if not line.is_solved():
+                    return False
+            self.transpose()
+            return True
+                
+                
+    def is_full(self):
+        return not any('_' in line.cells_list for line in self.line_list)
+
+    def set_cell(self, cell, cell_pos):
+        if cell in ['_', '.', 'x']:
+            self.line_list[cell_pos[0]].cells_list[cell_pos[1]] = cell
+            self.update()
+        else:
+            print('Cell must be _, . or x')
 
     def transpose(self):
         is_transposed = not self.is_transposed
