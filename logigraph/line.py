@@ -25,6 +25,16 @@ class line():
         if '_' in self.cells_list :
             return False
         else:
+            block_list = self.get_index_from_pattern()
+            if block_list == self.index_list:
+                return True
+            else:
+                return False
+
+    def get_index_from_pattern(self):
+        if '_' in self.cells_list :
+            return []
+        else:
             block_list = []
             new_block = True
             for cell_nbr, cell in enumerate(self.cells_list):
@@ -41,10 +51,4 @@ class line():
                         new_block = True
             if not new_block :
                 block_list.append(block_size)
-
-            if block_list == self.index_list:
-                return True
-            else:
-                return False
-
-
+        return block_list

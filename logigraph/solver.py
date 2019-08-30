@@ -31,6 +31,7 @@ class linear_solver():
 
         if not logigraph.is_solved() and logigraph.is_full():
             logigraph.is_possible = False
+            logigraph.is_lineary_solvable = False
         
     def line_partial_solve(self, mline):
         possible_solve_list = self.get_possible_solve_list(mline)
@@ -156,7 +157,8 @@ class edge_logic_solver():
                 if self.is_pattern_ok(pattern_on_adjacent_line):
                     edge_solve_list.append(possible_solution)
             partial_solve = l_solver.get_common_line(edge_solve_list)
-            self.set_logigraph_line(logigraph, partial_solve, case)
+            if partial_solve.cells_list != []:
+                self.set_logigraph_line(logigraph, partial_solve, case)
 
     def set_lines_and_index(self, logigraph, case):
         if case in ['left', 'right']:
@@ -175,6 +177,8 @@ class edge_logic_solver():
             if cell == 'x':
                 if self.trans_index_list[cell_nbr] > 1 :
                     pattern_on_adjacent_line.cells_list[cell_nbr] = 'x'
+                if self.trans_index_list[cell_nbr] == 1 :
+                    pattern_on_adjacent_line.cells_list[cell_nbr] = '.'
         return pattern_on_adjacent_line
                     
     def is_pattern_ok(self, pattern):
