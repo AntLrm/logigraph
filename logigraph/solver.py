@@ -202,12 +202,13 @@ class absurd_solver():
     def solve(self, logigraph):
         l_solver = linear_solver()
         for cell in [[line, col] for line in range(logigraph.line_nbr) for col in range(logigraph.col_nbr)]:
-            self.absurd_solve_try(logigraph, cell)
-            if logigraph.is_solved():
-                break
-            l_solver.solve(logigraph)
-            if logigraph.is_solved():
-                break
+            if logigraph.line_list[cell[0]].cells_list[cell[1]] == '_' :
+                self.absurd_solve_try(logigraph, cell)
+                if logigraph.is_solved():
+                    break
+                l_solver.solve(logigraph)
+                if logigraph.is_solved():
+                    break
         if not logigraph.is_solved():
             logigraph.is_possible = False
             
