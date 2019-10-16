@@ -21,7 +21,7 @@ class linear_solver():
                                 logigraph.col_state_list[cell_nbr] = True
 
                         line.cells_list = deepcopy(partial_solve.cells_list)
-            
+
             logigraph.transpose()
             if not any([line.has_been_updated for line in logigraph.line_list]) and not any(logigraph.col_state_list):
                 logigraph.is_lineary_solvable = False
@@ -32,7 +32,7 @@ class linear_solver():
         if not logigraph.is_solved() and logigraph.is_full():
             logigraph.is_possible = False
             logigraph.is_lineary_solvable = False
-        
+
     def line_partial_solve(self, mline):
         possible_solve_list = self.get_possible_solve_list(mline)
         if possible_solve_list == []:
@@ -48,7 +48,7 @@ class linear_solver():
             else:
                 emptyline = line(mline.size)
                 emptyline.cells_list = mline.size * ['.']
-                return [emptyline] 
+                return [emptyline]
 
         for offset in range(mline.size):
             if self.is_offset_ok(mline, offset):
@@ -57,7 +57,7 @@ class linear_solver():
                 if len(remaining_line_possible_solve_list) > 0:
                     for remaining_line_possible_solve in remaining_line_possible_solve_list:
                         possible_solve_list.append(self.merge_lines(mline, remaining_line_possible_solve))
-                        
+
         return possible_solve_list
 
     def get_common_line(self, lines_to_compare):
@@ -80,7 +80,7 @@ class linear_solver():
         return all(first == rest for rest in iterator)
 
 
-    def is_offset_ok(self, mline, offset):                             
+    def is_offset_ok(self, mline, offset):
         first_index = mline.index_list[0]
         for block_cell in range(first_index):
             if offset + block_cell >= mline.size:
@@ -110,7 +110,7 @@ class linear_solver():
         merged_line.cells_list = deepcopy(mline.cells_list)
         merged_line.index_list = deepcopy(mline.index_list)
         offset = mline.size - endline.size - mline.index_list[0] - 1
-        
+
         if offset < 0:
             print('Error during merging, out of range')
             return line(mline.size)
@@ -123,9 +123,9 @@ class linear_solver():
             merged_line.cells_list[cell_number] = 'x'
         if offset + mline.index_list[0] < merged_line.size:
             merged_line.cells_list[offset+mline.index_list[0]] = '.'
-        
+
         'writing remaining block with position'
-        for cell_number in range(endline.size): 
+        for cell_number in range(endline.size):
             original_cell = mline.cells_list[cell_number + mline.size - endline.size]
             endline_cell = endline.cells_list[cell_number]
 
@@ -134,7 +134,7 @@ class linear_solver():
             elif original_cell != endline_cell:
                 print('Error during merging, a conflict happened')
                 return line(mline.size)
-                
+
         return merged_line
 
 class edge_logic_solver():
@@ -144,8 +144,8 @@ class edge_logic_solver():
                 'bottom' : [-1,-2],
                 'left' : [0,1],
                 'right' : [-1,-2]
-                }                
-        
+                }
+
     def solve(self, logigraph):
         l_solver = linear_solver()
         for case in self.cases_dict:
@@ -180,7 +180,7 @@ class edge_logic_solver():
                 if self.trans_index_list[cell_nbr] == 1 :
                     pattern_on_adjacent_line.cells_list[cell_nbr] = '.'
         return pattern_on_adjacent_line
-                    
+
     def is_pattern_ok(self, pattern):
         l_solver = linear_solver()
         if len(l_solver.get_possible_solve_list(pattern)) > 0:
@@ -194,10 +194,10 @@ class edge_logic_solver():
 
         logigraph.line_list[self.cases_dict[case][0]] = line
         logigraph.update()
-        
+
         if logigraph.is_transposed:
             logigraph.transpose()
-            
+
 class absurd_solver():
     def solve(self, logigraph):
         l_solver = linear_solver()
@@ -211,7 +211,7 @@ class absurd_solver():
                     break
         if not logigraph.is_solved():
             logigraph.is_possible = False
-            
+
     def absurd_solve_try(self, logigraph, cell):
         test_logigraph = deepcopy(logigraph)
         test_logigraph.line_list[cell[0]].cells_list[cell[1]] = 'x'
